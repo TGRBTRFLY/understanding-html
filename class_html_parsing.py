@@ -32,6 +32,19 @@ ITEM_HTML = '''<html><head></head><body>
 '''
 
 
+class ParsedItemLocators:
+    """
+    Locators for an item in the HTML page.
+
+    This allows us to easily see what our code will be looking at as well as change it quickly if we notice it is now different.
+
+    """
+    NAME_LOCATOR = 'article.product_pod h3 a'
+    LINK_LOCATOR = 'article.product_pod h3 a'
+    PRICE_LOCATOR = 'article.product_pod p.price_color'
+    RATING_LOCATOR = 'article.product_pod p.star-rating'
+
+
 class ParsedItem:
     """
     A class to take in an HTML page (or part of it), and properties of an item in it.
@@ -41,19 +54,20 @@ class ParsedItem:
     def __init__(self, page):
         self.soup = BeautifulSoup(page, 'html.parser')
 
+    @property
     def find_item_name(self):
-        locator = 'article.product_pod h3 a'
+        locator = ParsedItemLocators.NAME_LOCATOR
         item_link = self.soup.select_one(locator)
         item_name = item_link.attrs['title']
         return item_name
 
     def find_item_link(self):
-        locator = 'article.product_pod h3 a'
+        locator = ParsedItemLocators.LINK_LOCATOR
         item_link = self.soup.select_one(locator).attrs['href']
         return item_link
 
     def find_item_price(self):
-        locator = 'article.product_pod p.price_color'
+        locator = ParsedItemLocators.PRICE_LOCATOR
         item_price = self.soup.select_one(locator).string
         pattern = '£([0-9]+\.[0-9]+)'
         matcher = re.search(pattern, item_price)
@@ -61,7 +75,7 @@ class ParsedItem:
         return float(matcher.group(1)) * 0.8
 
     def find_item_rating(self):
-        locator = 'article.product_pod p.star-rating'
+        locator = ParsedItemLocators.RATING_LOCATOR
         star_rating_tag = self.soup.select_one(locator)
         classes = star_rating_tag.attrs['class']  # ['star-rating', 'Three']
         rating_classes = [r for r in classes if r != 'star-rating']
